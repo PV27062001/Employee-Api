@@ -21,7 +21,7 @@ public class WebSecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
-        httpSecurity.authorizeHttpRequests(requests -> requests.anyRequest().authenticated());
+        httpSecurity.authorizeHttpRequests(requests -> requests.requestMatchers("/api/v1/employee/**").hasRole("ADMIN").anyRequest().authenticated());
 //        httpSecurity.formLogin(Customizer.withDefaults());
         httpSecurity.httpBasic(Customizer.withDefaults());
         httpSecurity.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -38,7 +38,7 @@ public class WebSecurityConfiguration {
         UserDetails userDetails2 = User.withDefaultPasswordEncoder()
                 .username("ravi")
                 .password("praveen")
-                .roles("ADMIN")
+                .roles("USER")
                 .build();
         UserDetails userDetails3 = User.withDefaultPasswordEncoder()
                 .username("ram")
@@ -50,6 +50,8 @@ public class WebSecurityConfiguration {
                 .password("praveen")
                 .roles("ADMIN")
                 .build();
+        /// by default the passwords are encrypted and decrypted while using the withDefaultPasswordEncoder()
+        System.out.println("password: "+userDetails2.getPassword());
         return new InMemoryUserDetailsManager(userDetails,userDetails2,userDetails3,userDetails4);
     }
 }
