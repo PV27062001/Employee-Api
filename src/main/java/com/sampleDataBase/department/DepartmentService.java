@@ -26,7 +26,7 @@ public class DepartmentService {
                 return departmentRepository.save(department);
             }
         else {
-            throw new EmployeeException("Deaprtment not found");
+            throw new EmployeeException("Department not found");
         }
     }
 
