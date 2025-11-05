@@ -26,6 +26,7 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation "org.springframework.boot:spring-boot-starter-security"
 
 	implementation 'org.postgresql:postgresql:42.7.7'
 	implementation 'com.h2database:h2'
@@ -34,6 +35,12 @@ dependencies {
 	implementation 'tools.jackson.core:jackson-databind:3.0.0-rc9'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	// jwt dependencies
+
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.6'  // Contains only the public interfaces, builders, and exceptions (like Jwts.builder(), Claims, etc.).
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'  // Contains the actual implementation of the API methods — the logic that signs, parses, and validates JWTs.
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'    // Provides Jackson-based JSON handling — used to serialize claims to JSON and parse them back.
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

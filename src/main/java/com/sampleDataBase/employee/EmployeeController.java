@@ -1,10 +1,12 @@
 package com.sampleDataBase.employee;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -51,6 +53,13 @@ public class EmployeeController {
     @PatchMapping(value = "/employee/{id}/bonus")
     public Employee updateSalaryAndBonusForGivenEmployee(@PathVariable String id){
         return employeeService.calculateBonusAndUpdateIt(id);
+    }
+
+
+    /// learning purpose to get the csrf Token
+    @GetMapping("/csrf-token")
+    public CsrfToken getCsrfToken(HttpServletRequest httpServletRequest){
+        return (CsrfToken) httpServletRequest.getAttribute("_csrf");
     }
 
 }
