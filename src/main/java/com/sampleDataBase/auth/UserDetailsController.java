@@ -2,10 +2,8 @@ package com.sampleDataBase.auth;
 
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.SneakyThrows;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -14,8 +12,14 @@ public class UserDetailsController {
 
     private final UserDetailService userDetailService;
 
+    @SneakyThrows
     @PostMapping("/save-user")
-    public Users saveUsers(@RequestBody Users users){
+    public Users saveUsers(@RequestBody UserRequest users){
         return userDetailService.saveUsers(users);
+    }
+
+    @PostMapping("/login")
+    public String checkLoginIsValid(@RequestBody UserRequest user){
+        return userDetailService.verifyUsers(user);
     }
 }
