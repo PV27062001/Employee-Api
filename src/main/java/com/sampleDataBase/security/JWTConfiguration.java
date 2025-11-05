@@ -2,18 +2,15 @@ package com.sampleDataBase.security;
 
 
 import com.sampleDataBase.auth.Users;
-import com.sampleDataBase.shared.Properties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Date;
@@ -29,7 +26,7 @@ public class JWTConfiguration {
 
     public JWTConfiguration() {
         try {
-            KeyGenerator keyGenerator = KeyGenerator.getInstance("HMACSHA256");
+            KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
             SecretKey sk = keyGenerator.generateKey();
             secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
         } catch (NoSuchAlgorithmException e) {
@@ -38,12 +35,12 @@ public class JWTConfiguration {
     }
     public String generateToken(Users users) {
         Map<String,Object> claims = new HashMap<>();
-        claims.put("roles","ADMIN");
+        claims.put("roles",users.getRoles());
         return Jwts.builder()
                 .claims(claims)
                 .subject(users.getUserName())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 60 * 60 * 30))
+                .expiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
                 .signWith(getKey())
                 .compact();
     }

@@ -10,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -21,6 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity(securedEnabled = true)
 public class WebSecurityConfiguration {
 
     private final UserDetailServiceProvider userDetailServiceProvider;
@@ -31,11 +33,26 @@ public class WebSecurityConfiguration {
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
         httpSecurity.authorizeHttpRequests(requests -> requests.requestMatchers("/api/v1/user/**").permitAll().anyRequest().authenticated());
 //        httpSecurity.formLogin(Customizer.withDefaults());
-//        httpSecurity.httpBasic(Customizer.withDefaults());
+        httpSecurity.httpBasic(Customizer.withDefaults());
         httpSecurity.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         httpSecurity.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
+
+//    SecurityContextPersistenceFilter
+//      ↓
+//    CorsFilter
+//      ↓
+//    CsrfFilter
+//      ↓
+//    JWTFilter  ← 👈 Your filter runs here (added by addFilterBefore)
+//      ↓
+//    UsernamePasswordAuthenticationFilter
+//      ↓
+//    FilterSecurityInterceptor
+//      ↓
+//    DispatcherServlet (your controllers)
+
 
 //    @Bean
 //    public UserDetailsService customUserNamePassword(){

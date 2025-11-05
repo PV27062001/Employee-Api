@@ -50,4 +50,22 @@ public class JwtFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+
+//    Incoming request → JwtFilter
+//         ↓
+//    Extract JWT from Authorization header
+//         ↓
+//    Validate JWT → extract username
+//         ↓
+//    Load UserDetails from DB
+//         ↓
+//    Create Authentication (UsernamePasswordAuthenticationToken)
+//         ↓
+//    Attach request metadata (details)
+//         ↓
+//    Put it into SecurityContextHolder
+//         ↓
+//    Pass to next filters → DispatcherServlet → Controller
+
+
 }

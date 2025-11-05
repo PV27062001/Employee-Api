@@ -14,4 +14,5 @@ public interface UserDetailProviderRepository extends JpaRepository<Users,Intege
 
     @Query(value = "select user_name from users",nativeQuery = true)
     List<String> getAllUserNames();
+
 }

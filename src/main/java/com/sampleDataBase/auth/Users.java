@@ -1,10 +1,7 @@
 package com.sampleDataBase.auth;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
@@ -22,5 +19,6 @@ public class Users
     private int id;
     private String userName;
     private String password;
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles;
 }

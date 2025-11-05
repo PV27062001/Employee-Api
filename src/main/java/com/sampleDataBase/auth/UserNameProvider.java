@@ -6,9 +6,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
 
 public class UserNameProvider implements UserDetails {
+
+
     private  Users user;
     public UserNameProvider(Users user) {
         this.user = user;
@@ -16,7 +17,9 @@ public class UserNameProvider implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority("ADMIN"));
+        return user.getRoles().stream()
+                .map(roles ->new SimpleGrantedAuthority("ROLE_"+roles))
+                .toList();
     }
 
     @Override
