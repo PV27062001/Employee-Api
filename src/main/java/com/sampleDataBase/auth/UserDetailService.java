@@ -3,17 +3,18 @@ package com.sampleDataBase.auth;
 import com.sampleDataBase.exception.UserNameAuthenticationException;
 import com.sampleDataBase.security.JWTConfiguration;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +54,7 @@ public class UserDetailService {
         if (!authentication.isAuthenticated()) {
             throw new UserNameAuthenticationException("Invalid username or password.");
         }
-        return jwtConfiguration.generateToken(user);
+        return jwtConfiguration.generateAccessToken(user);
     }
 
     public List<String> getAllUserName() {
@@ -61,7 +62,7 @@ public class UserDetailService {
     }
 
     public String updateRoleForUsersByUserName(UpdateRoleRequest updateRoleRequest) throws UserNameAuthenticationException {
-       Users user =  userDetailProviderRepository.findUserByUserName(updateRoleRequest.getName());
+       Users user = getUserByUserName(updateRoleRequest.getName());
         if (user == null) {
             throw new UserNameAuthenticationException("User not found. Please register first.");
         }
@@ -75,4 +76,35 @@ public class UserDetailService {
         saveUsers(user);
         return "roles updated successfully";
     }
+
+    private Users getUserByUserName(String userName) {
+        return userDetailProviderRepository.findUserByUserName(userName);
+    }
+
+    @SneakyThrows
+    public Map<String, String> getAccessTokenAndRefreshToken(UserRequest userRequest) {
+        Map<String,String> tokenMap = new HashMap<>();
+        tokenMap.put("access_token", verifyUsers(userRequest));
+        tokenMap.put("refresh_token", getRefreshToken(getUserByUserName(userRequest.getUserName())));
+        return tokenMap;
+    }
+
+    private String getRefreshToken(Users user) {
+       return jwtConfiguration.generateRefreshToken(user);
+    }
+
+    public Map<String, String> getNewToken(Map<String, String> request) throws UserNameAuthenticationException {
+        String refreshToken = request.get("refresh_token");
+        if(refreshToken.isBlank()){
+            throw new UserNameAuthenticationException("Missing refresh token in the header");
+        }
+        String userName = jwtConfiguration.extractUserName(refreshToken);
+        Users user = getUserByUserName(userName);
+        if(!jwtConfiguration.validateToken(refreshToken, new UserNameProvider(user))){
+            throw new UserNameAuthenticationException("Invalid or expired refresh token,Please Login Again  ");
+        }
+        String newAccessToken = jwtConfiguration.generateAccessToken(user);
+        return Map.of("access_token",newAccessToken);
+    }
+
 }
