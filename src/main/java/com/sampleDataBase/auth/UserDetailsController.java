@@ -21,6 +21,7 @@ public class UserDetailsController {
 
     private final UserDetailService userDetailService;
 
+
     @SneakyThrows
     @PostMapping("/save-user")
     public Users saveUsers(@RequestBody UserRequest users){
@@ -43,6 +44,12 @@ public class UserDetailsController {
     @GetMapping("/get-all")
     public List<String> getAllUserNames(){
         return userDetailService.getAllUserName();
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@RequestBody Map<String,String> request){
+        return ResponseEntity.ok(userDetailService.logout(request));
     }
 
     @SneakyThrows

@@ -47,14 +47,7 @@ public class JWTConfiguration {
                 .signWith(getKey())
                 .compact();
     }
-    public String generateRefreshToken(Users user) {
-        return Jwts.builder()
-                .subject(user.getUserName())
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
-                .signWith(getKey())
-                .compact();
-    }
+
 
 
 //            | Line                            | Purpose                                              | Why                                          |

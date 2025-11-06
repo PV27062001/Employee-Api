@@ -1,5 +1,7 @@
 package com.sampleDataBase.auth;
 
+import com.sampleDataBase.auth.refreshtoken.RefreshToken;
+import com.sampleDataBase.auth.refreshtoken.RefreshTokenService;
 import com.sampleDataBase.exception.UserNameAuthenticationException;
 import com.sampleDataBase.security.JWTConfiguration;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,8 @@ public class UserDetailService {
     private final BCryptPasswordEncoder encoder;
     private final AuthenticationManager authenticationManager;
     private final JWTConfiguration jwtConfiguration;
+    private final RefreshTokenService refreshTokenService;
+
 
     public Users saveUsers(UserRequest userRequest) throws UserNameAuthenticationException {
         if(!checkIfUserNameISAlreadyPresent(userRequest.getUserName())) {
@@ -85,26 +89,44 @@ public class UserDetailService {
     public Map<String, String> getAccessTokenAndRefreshToken(UserRequest userRequest) {
         Map<String,String> tokenMap = new HashMap<>();
         tokenMap.put("access_token", verifyUsers(userRequest));
-        tokenMap.put("refresh_token", getRefreshToken(getUserByUserName(userRequest.getUserName())));
+        tokenMap.put("refresh_token", getRefreshToken(getUserByUserName(userRequest.getUserName())).getToken());
         return tokenMap;
     }
 
-    private String getRefreshToken(Users user) {
-       return jwtConfiguration.generateRefreshToken(user);
+    private RefreshToken getRefreshToken(Users user) {
+        return refreshTokenService.createRefreshToken(user.getUserName());
     }
 
     public Map<String, String> getNewToken(Map<String, String> request) throws UserNameAuthenticationException {
-        String refreshToken = request.get("refresh_token");
-        if(refreshToken.isBlank()){
-            throw new UserNameAuthenticationException("Missing refresh token in the header");
+        String requestToken = request.get("refresh_token");
+        if (requestToken == null || requestToken.isBlank()) {
+            throw new UserNameAuthenticationException("Missing refresh token in request");
         }
-        String userName = jwtConfiguration.extractUserName(refreshToken);
-        Users user = getUserByUserName(userName);
-        if(!jwtConfiguration.validateToken(refreshToken, new UserNameProvider(user))){
-            throw new UserNameAuthenticationException("Invalid or expired refresh token,Please Login Again  ");
+
+        RefreshToken refreshToken = refreshTokenService.findByToken(requestToken)
+                .orElseThrow(() -> new UserNameAuthenticationException("Invalid refresh token"));
+
+        if (refreshTokenService.isExpired(refreshToken)) {
+            refreshTokenService.deleteByUsername(refreshToken.getUserName());
+            throw new UserNameAuthenticationException("Refresh token expired. Please log in again.");
         }
+
+        Users user = getUserByUserName(refreshToken.getUserName());
         String newAccessToken = jwtConfiguration.generateAccessToken(user);
-        return Map.of("access_token",newAccessToken);
+
+        refreshTokenService.deleteByUsername(user.getUserName());
+        RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getUserName());
+
+        return Map.of(
+                "access_token", newAccessToken,
+                "refresh_token", newRefreshToken.getToken()
+        );
+    }
+
+    public String logout(Map<String,String> request){
+        String userName = request.get("userName");
+        refreshTokenService.deleteByUsername(userName);
+        return "logged out successfully";
     }
 
 }
