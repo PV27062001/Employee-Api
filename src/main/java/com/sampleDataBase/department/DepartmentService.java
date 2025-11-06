@@ -32,8 +32,8 @@ public class DepartmentService {
 
     public Department getDepartmentByName(String name){
         return departmentRepository.findAll()
-                .stream()
-                .filter(department -> department.getDepartmentName().equals(DepartmentName.valueOf(name)))
+                .parallelStream()
+                .filter(department -> department.getDepartmentName().equals(DepartmentName.valueOf(name.toUpperCase())))
                 .findFirst()
                 .orElseThrow(() -> new EmployeeException("No department Found"));
     }
