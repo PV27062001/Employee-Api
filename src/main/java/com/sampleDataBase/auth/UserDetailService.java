@@ -1,19 +1,22 @@
 package com.sampleDataBase.auth;
 
+import com.sampleDataBase.auth.refreshtoken.RefreshToken;
+import com.sampleDataBase.auth.refreshtoken.RefreshTokenService;
 import com.sampleDataBase.exception.UserNameAuthenticationException;
 import com.sampleDataBase.security.JWTConfiguration;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +25,8 @@ public class UserDetailService {
     private final BCryptPasswordEncoder encoder;
     private final AuthenticationManager authenticationManager;
     private final JWTConfiguration jwtConfiguration;
+    private final RefreshTokenService refreshTokenService;
+
 
     public Users saveUsers(UserRequest userRequest) throws UserNameAuthenticationException {
         if(!checkIfUserNameISAlreadyPresent(userRequest.getUserName())) {
@@ -53,7 +58,7 @@ public class UserDetailService {
         if (!authentication.isAuthenticated()) {
             throw new UserNameAuthenticationException("Invalid username or password.");
         }
-        return jwtConfiguration.generateToken(user);
+        return jwtConfiguration.generateAccessToken(user);
     }
 
     public List<String> getAllUserName() {
@@ -61,7 +66,7 @@ public class UserDetailService {
     }
 
     public String updateRoleForUsersByUserName(UpdateRoleRequest updateRoleRequest) throws UserNameAuthenticationException {
-       Users user =  userDetailProviderRepository.findUserByUserName(updateRoleRequest.getName());
+       Users user = getUserByUserName(updateRoleRequest.getName());
         if (user == null) {
             throw new UserNameAuthenticationException("User not found. Please register first.");
         }
@@ -75,4 +80,53 @@ public class UserDetailService {
         saveUsers(user);
         return "roles updated successfully";
     }
+
+    private Users getUserByUserName(String userName) {
+        return userDetailProviderRepository.findUserByUserName(userName);
+    }
+
+    @SneakyThrows
+    public Map<String, String> getAccessTokenAndRefreshToken(UserRequest userRequest) {
+        Map<String,String> tokenMap = new HashMap<>();
+        tokenMap.put("access_token", verifyUsers(userRequest));
+        tokenMap.put("refresh_token", getRefreshToken(getUserByUserName(userRequest.getUserName())).getToken());
+        return tokenMap;
+    }
+
+    private RefreshToken getRefreshToken(Users user) {
+        return refreshTokenService.createRefreshToken(user.getUserName());
+    }
+
+    public Map<String, String> getNewToken(Map<String, String> request) throws UserNameAuthenticationException {
+        String requestToken = request.get("refresh_token");
+        if (requestToken == null || requestToken.isBlank()) {
+            throw new UserNameAuthenticationException("Missing refresh token in request");
+        }
+
+        RefreshToken refreshToken = refreshTokenService.findByToken(requestToken)
+                .orElseThrow(() -> new UserNameAuthenticationException("Invalid refresh token"));
+
+        if (refreshTokenService.isExpired(refreshToken)) {
+            refreshTokenService.deleteByUsername(refreshToken.getUserName());
+            throw new UserNameAuthenticationException("Refresh token expired. Please log in again.");
+        }
+
+        Users user = getUserByUserName(refreshToken.getUserName());
+        String newAccessToken = jwtConfiguration.generateAccessToken(user);
+
+        refreshTokenService.deleteByUsername(user.getUserName());
+        RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getUserName());
+
+        return Map.of(
+                "access_token", newAccessToken,
+                "refresh_token", newRefreshToken.getToken()
+        );
+    }
+
+    public String logout(Map<String,String> request){
+        String userName = request.get("userName");
+        refreshTokenService.deleteByUsername(userName);
+        return "logged out successfully";
+    }
+
 }

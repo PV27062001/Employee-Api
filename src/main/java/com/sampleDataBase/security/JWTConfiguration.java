@@ -23,6 +23,9 @@ import java.util.function.Function;
 public class JWTConfiguration {
 //    private final Properties properties;
     private String secretKey = "";
+    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 15; // 15 min
+    private static final long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24 * 7;
+
 
     public JWTConfiguration() {
         try {
@@ -33,17 +36,19 @@ public class JWTConfiguration {
             throw new RuntimeException(e);
         }
     }
-    public String generateToken(Users users) {
+    public String generateAccessToken(Users users) {
         Map<String,Object> claims = new HashMap<>();
         claims.put("roles",users.getRoles());
         return Jwts.builder()
                 .claims(claims)
                 .subject(users.getUserName())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
+                .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
                 .signWith(getKey())
                 .compact();
     }
+
+
 
 //            | Line                            | Purpose                                              | Why                                          |
 //            | ------------------------------- | ---------------------------------------------------- | -------------------------------------------- |
@@ -90,4 +95,6 @@ public class JWTConfiguration {
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
+
+
 }
