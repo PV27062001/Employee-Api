@@ -12,4 +12,11 @@ import org.springframework.stereotype.Service;
 public class Properties {
     @Value("${secret.key}")
     private String secretKey;
+
+    @Value("${initial.user}")
+    private String userName;
+    @Value("${initial.user.secure}")
+    private String userPassword;
+    @Value("${initial.role}")
+    private String userRole;
 }
