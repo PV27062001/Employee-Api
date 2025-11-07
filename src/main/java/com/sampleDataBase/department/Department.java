@@ -1,8 +1,9 @@
 package com.sampleDataBase.department;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sampleDataBase.employee.Employee;
+import com.sampleDataBase.interview.interviewdepartmentstatus.InterviewDepartmentStatus;
 import com.sampleDataBase.manager.Manager;
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,4 +38,8 @@ public class Department {
     @OneToMany
     @Cascade(CascadeType.ALL)
     private List<Employee> employees;
+
+    @OneToMany(mappedBy = "department")
+    @JsonManagedReference
+    private List<InterviewDepartmentStatus> interviewStatuses;
 }

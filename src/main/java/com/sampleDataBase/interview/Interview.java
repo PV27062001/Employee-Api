@@ -1,11 +1,13 @@
 package com.sampleDataBase.interview;
 
-
-import com.sampleDataBase.auth.Users;
-import com.sampleDataBase.department.Department;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.sampleDataBase.interview.interviewdepartmentstatus.InterviewDepartmentStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -14,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class Interview {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -23,8 +26,10 @@ public class Interview {
 
     private boolean isAppliedAny;
 
-    private boolean isGotOffer;
+    @OneToMany(mappedBy = "interview",cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<InterviewDepartmentStatus> departmentStatuses;
 
-    @OneToMany
-    private List<Department> department;
+    @CreatedDate
+    private Date createdAt;
 }

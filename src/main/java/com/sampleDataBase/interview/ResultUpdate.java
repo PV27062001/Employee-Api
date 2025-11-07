@@ -3,6 +3,8 @@ package com.sampleDataBase.interview;
 
 import lombok.*;
 
+import java.util.Map;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -10,6 +12,5 @@ import lombok.*;
 @Builder
 public class ResultUpdate {
     private String userName;
-    private String departmentName;
-    private boolean result;
+    private Map<String,Boolean> update;
 }
