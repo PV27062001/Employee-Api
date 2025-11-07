@@ -1,0 +1,24 @@
+# Base image
+FROM openjdk:17-jdk-slim
+
+WORKDIR /app
+
+# Accept build arguments (from GitHub secrets)
+ARG DB_URL
+ARG DB_USER
+ARG DB_PASSWORD
+ARG ADMIN_USERNAME
+ARG ADMIN_PASSWORD
+ARG ADMIN_ROLE
+# Set them as environment variables for runtime
+ENV DB_URL=$DB_URL
+ENV DB_USER=$DB_USER
+ENV DB_PASSWORD=$DB_PASSWORD
+ENV ADMIN_USERNAME=$ADMIN_USERNAME
+ENV ADMIN_PASSWORD=$ADMIN_PASSWORD
+ENV ADMIN_ROLE=$ADMIN_ROLE
+
+COPY build/libs/*.jar app.jar
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
