@@ -4,6 +4,7 @@ import com.employeeApplication.auth.UserDetailProviderRepository;
 import com.employeeApplication.auth.Users;
 import com.employeeApplication.department.Department;
 import com.employeeApplication.department.DepartmentRepository;
+import com.employeeApplication.department.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ import static com.employeeApplication.department.DepartmentName.*;
 public class InitialDataDump {
 
     private final DepartmentRepository departmentRepository;
+    private final DepartmentService departmentService;
     private final UserDetailProviderRepository userDetailProviderRepository;
     private final BCryptPasswordEncoder encoder;
     private final Properties properties;
@@ -29,15 +31,23 @@ public class InitialDataDump {
         List<Department> defaultDepartments = List.of(
                 Department.builder()
                         .departmentName(HR)
+                        .baseSalary(departmentService.setBaseSalaryForDepartment("HR"))
                         .description("hr department")
                         .build(),
                 Department.builder()
                         .departmentName(SALES)
+                        .baseSalary(departmentService.setBaseSalaryForDepartment("SALES"))
                         .description("sales department")
                         .build(),
                 Department.builder()
                         .departmentName(TECH)
+                        .baseSalary(departmentService.setBaseSalaryForDepartment("TECH"))
                         .description("tech department")
+                        .build(),
+                Department.builder()
+                        .departmentName(FINANCE)
+                        .baseSalary(departmentService.setBaseSalaryForDepartment("FINANCE"))
+                        .description("finance department")
                         .build()
         );
 

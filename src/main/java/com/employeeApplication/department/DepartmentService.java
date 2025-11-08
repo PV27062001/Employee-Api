@@ -38,4 +38,29 @@ public class DepartmentService {
                 .orElseThrow(() -> new EmployeeException("No department Found"));
     }
 
+    public double setBaseSalaryForDepartment(String departmentName){
+        double baseSalary;
+        switch (DepartmentName.valueOf(departmentName)){
+            case HR -> baseSalary = 5000.0;
+            case TECH -> baseSalary = 1000000.0;
+            case SALES -> baseSalary = 12000.0;
+            case FINANCE -> baseSalary = 800000.0;
+            default -> baseSalary = 10000;
+        }
+        return baseSalary;
+    }
+
+   public double getBonusPercentageByDepartment(Department department) {
+        double bonusPercentage;
+        switch (department.getDepartmentName()){
+            case HR -> bonusPercentage = 5;
+            case TECH -> bonusPercentage = 10;
+            case SALES -> bonusPercentage = 12;
+            case FINANCE -> bonusPercentage = 8;
+            default -> bonusPercentage = 1;
+        }
+        return bonusPercentage;
+    }
+
+
 }
