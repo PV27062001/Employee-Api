@@ -31,6 +31,9 @@ public class Department {
 
     private String description;
 
+    @NonNull
+    private Double baseSalary;
+
     @OneToMany
     @Cascade(CascadeType.ALL)
     private List<Manager> managers;

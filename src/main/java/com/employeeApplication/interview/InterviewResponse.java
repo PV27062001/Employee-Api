@@ -1,16 +1,17 @@
 package com.employeeApplication.interview;
 
-
 import lombok.*;
 
+import java.util.Date;
 import java.util.Map;
 
+@Builder
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class ResultUpdate {
+public class InterviewResponse {
     private String userName;
-    private Map<String,String > statusByDepartment;
+    private Map<String,String> statusByDepartment;
+    private Date appliedDate;
 }

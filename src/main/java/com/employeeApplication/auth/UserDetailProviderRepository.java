@@ -12,7 +12,7 @@ public interface UserDetailProviderRepository extends JpaRepository<Users,Intege
     @Query(value = "select * from users where user_name = :userName",nativeQuery = true)
     Users findUserByUserName(@Param("userName") String userName);
 
-    @Query(value = "select user_name from users",nativeQuery = true)
+    @Query(value = "select user_name from public.users",nativeQuery = true)
     List<String> getAllUserNames();
 
 }

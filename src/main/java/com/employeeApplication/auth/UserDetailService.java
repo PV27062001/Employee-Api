@@ -24,6 +24,12 @@ public class UserDetailService {
     private final JWTConfiguration jwtConfiguration;
     private final RefreshTokenService refreshTokenService;
 
+    public String isUserNamePresent(String userName) throws UserNameAuthenticationException{
+        return getAllUserName().stream()
+                .filter(name -> name.equalsIgnoreCase(userName))
+                .findFirst()
+                .orElseThrow(() -> new UserNameAuthenticationException("UserName not found on the registry"));
+    }
 
     public Users saveUsers(UserRequest userRequest) throws UserNameAuthenticationException {
         if(!checkIfUserNameISAlreadyPresent(userRequest.getUserName())) {
@@ -47,7 +53,7 @@ public class UserDetailService {
     }
 
     public String verifyUsers(UserRequest userRequest) throws UserNameAuthenticationException {
-        Users user = userDetailProviderRepository.findUserByUserName(userRequest.getUserName());
+        Users user = getUserByUserName(userRequest.getUserName());
         if (user == null) {
             throw new UserNameAuthenticationException("User not found. Please register first.");
         }
@@ -78,9 +84,7 @@ public class UserDetailService {
         return "roles updated successfully";
     }
 
-    private Users getUserByUserName(String userName) {
-        return userDetailProviderRepository.findUserByUserName(userName);
-    }
+
 
     @SneakyThrows
     public Map<String, String> getAccessTokenAndRefreshToken(UserRequest userRequest) {
@@ -126,4 +130,7 @@ public class UserDetailService {
         return "logged out successfully";
     }
 
+    private Users getUserByUserName(String userName) {
+        return userDetailProviderRepository.findUserByUserName(userName);
+    }
 }

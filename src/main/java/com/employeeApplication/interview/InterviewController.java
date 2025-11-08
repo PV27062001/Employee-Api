@@ -1,6 +1,7 @@
 package com.employeeApplication.interview;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,21 +15,26 @@ import java.util.List;
 public class InterviewController {
     private final InterviewService interviewService;
 
-    @PreAuthorize("isAuthenticated()")
     @PostMapping("/apply-job")
+    @SneakyThrows
     public ResponseEntity<Interview> applyForInterview(@RequestBody InterviewRequest interviewRequest){
         return ResponseEntity.ok(interviewService.addInterviewData(interviewRequest));
     }
 
-    @PreAuthorize("isAuthenticated() and hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/update-result")
     public String isGotJob(@RequestBody ResultUpdate resultUpdate){
         return interviewService.jobResponse(resultUpdate);
     }
 
-    @PreAuthorize("isAuthenticated() and hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/getall/interview")
     public List<Interview> getAll(){
         return interviewService.getAll();
+    }
+
+    @GetMapping(value = "/track/get/interview-by/userName",params = {"userName"})
+    public InterviewResponse getInterviewResponseByUserName(@RequestParam String userName){
+        return interviewService.getInterviewResponseByUserName(userName);
     }
 }

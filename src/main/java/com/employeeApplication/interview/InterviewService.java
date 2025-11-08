@@ -1,15 +1,16 @@
 package com.employeeApplication.interview;
 
+import com.employeeApplication.auth.UserDetailService;
 import com.employeeApplication.department.Department;
 import com.employeeApplication.department.DepartmentService;
+import com.employeeApplication.employee.EmployeeService;
+import com.employeeApplication.exception.UserNameAuthenticationException;
 import com.employeeApplication.interview.interviewdepartmentstatus.InterviewDepartmentStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -17,10 +18,14 @@ public class InterviewService {
 
     private final InterviewRepository interviewRepository;
     private final DepartmentService departmentService;
+    private final UserDetailService userDetailService;
+    private final EmployeeService employeeService;
 
-    public Interview addInterviewData(InterviewRequest interviewRequest) {
+    public Interview addInterviewData(InterviewRequest interviewRequest) throws UserNameAuthenticationException {
+
+        String userName = userDetailService.isUserNamePresent(interviewRequest.getUserName());
         Interview interview = Interview.builder()
-                .userName(interviewRequest.getUserName())
+                .userName(userName)
                 .isAppliedAny(true)
                 .build();
 
@@ -49,12 +54,29 @@ public class InterviewService {
         return Optional.of(interviewRepository.findInterviewByName(userName));
     }
 
+    public InterviewResponse getInterviewResponseByUserName(String userName){
+
+        Interview interview =  Optional.of(interviewRepository.findInterviewByName(userName))
+                .orElseThrow(() -> new NoSuchElementException("No interview found for the given userName"));
+
+        Map<String,String> resultMap = new HashMap<>();
+        for(int i = 0;i< interview.getDepartmentStatuses().size();i++){
+            resultMap.put(interview.getDepartmentStatuses().get(i).getDepartment().getDepartmentName().name(),interview.getDepartmentStatuses().get(i).getStatus().name());
+        }
+       return InterviewResponse.builder()
+                .userName(userName)
+                .appliedDate(interview.getCreatedAt())
+                .statusByDepartment(resultMap)
+                .build();
+    }
+
+    @Transactional
     public String jobResponse(ResultUpdate resultUpdate) {
         Interview interview = getInterviewByUserName(resultUpdate.getUserName()).orElseThrow(() -> new NoSuchElementException("No Interview object found for the userName"));
 
-        for(Map.Entry<String, Boolean> department: resultUpdate.getUpdate().entrySet()){
+        for(Map.Entry<String, String> department: resultUpdate.getStatusByDepartment().entrySet()){
             String departmentName = department.getKey();
-            boolean isSelected = department.getValue();
+            String isSelected = department.getValue();
 
             interview.getDepartmentStatuses().stream()
                     .filter(status -> status.getDepartment()
@@ -63,8 +85,9 @@ public class InterviewService {
 
                     .findFirst()
                     .ifPresent(interviewDepartmentStatus -> {
-                        if (isSelected) {
+                        if (isSelected.equals(("ACCEPTED"))) {
                             interviewDepartmentStatus.setStatus(Status.ACCEPTED);
+                            employeeService.saveEmployee(resultUpdate);
                         } else {
                             interviewDepartmentStatus.setStatus(Status.REJECTED);
                         }

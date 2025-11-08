@@ -18,10 +18,6 @@ public class EmployeeController {
     @Autowired
     EmployeeService employeeService;
 
-    @PostMapping(value = "/save")
-    public Employee saveEmployee(@RequestBody EmployeeRequest employee){
-        return employeeService.saveEmployee(employee);
-    }
 
     @GetMapping("/getAll")
     public List<Employee> getAll(){

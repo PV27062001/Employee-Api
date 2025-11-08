@@ -2,6 +2,7 @@ package com.employeeApplication.employee;
 
 import com.employeeApplication.department.Department;
 import com.employeeApplication.department.DepartmentService;
+import com.employeeApplication.interview.ResultUpdate;
 import com.employeeApplication.manager.Manager;
 import com.employeeApplication.manager.ManagerService;
 import lombok.RequiredArgsConstructor;
@@ -9,9 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -22,7 +23,6 @@ public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final DepartmentService departmentService;
     private final ManagerService managerService;
-
 
     public List<Employee> getAllEmployee(){
         return employeeRepository.findAll();
@@ -47,15 +47,28 @@ public class EmployeeService {
         return managerService.getManagerByName(name);
     }
 
-    @Transactional
-    public Employee saveEmployee(EmployeeRequest employeeRequest){
-       Employee employee = Employee.builder()
+
+    public String saveEmployee(ResultUpdate resultUpdate){
+        String departmentName = "";
+        for(Map.Entry<String,String> status: resultUpdate.getStatusByDepartment().entrySet()){
+            if(status.getValue().equals("ACCEPTED")){
+                departmentName = status.getKey();
+            }
+        }
+
+        Employee employee = Employee.builder()
                 .employeeId(idGenerator())
-                .name(employeeRequest.getName())
-                .dept(getDepartmentByName(employeeRequest.getDepartmentName().toUpperCase()))
-                .salary(employeeRequest.getSalary())
-//                .manager(getManagerByName(employeeRequest.getManagerName().toLowerCase()))
+                .name(resultUpdate.getUserName())
+                .dept(getDepartmentByName(departmentName))
+                .salary(departmentService.setBaseSalaryForDepartment(departmentName))
                 .build();
+         employeeRepository.save(employee);
+         return "employee saved successfully";
+    }
+
+    public Employee saveManagerToEmployee(String id,String managerName){
+        Employee employee = getEmployeeById(id.toUpperCase());
+        employee.setManager(getManagerByName(managerName));
         return employeeRepository.save(employee);
     }
 
@@ -70,37 +83,17 @@ public class EmployeeService {
         return employeeRepository.findAll(pageable);
     }
 
-    public Employee saveManagerToEmployee(String id,String managerName){
-        Employee employee = getEmployeeById(id.toUpperCase());
-        employee.setManager(getManagerByName(managerName));
-        return employeeRepository.save(employee);
-    }
-
-
     public Employee calculateBonusAndUpdateIt(String id){
         Employee employee = getEmployeeById(id.toUpperCase());
         employee.setSalary(calculateBonus(employee.getDept(),employee.getSalary()));
-        employee.setBonus(getBonusPercentageByDepartment(employee.getDept()));
+        employee.setBonus(departmentService.getBonusPercentageByDepartment(employee.getDept()));
         return employeeRepository.save(employee);
     }
 
     private Double calculateBonus(Department department,Double salary){
         double bonusPercentage;
-        bonusPercentage = getBonusPercentageByDepartment(department);
+        bonusPercentage = departmentService.getBonusPercentageByDepartment(department);
         return salary + (salary * bonusPercentage/100);
     }
-
-    private static double getBonusPercentageByDepartment(Department department) {
-        double bonusPercentage;
-        switch (department.getDepartmentName()){
-            case HR -> bonusPercentage = 5;
-            case TECH -> bonusPercentage = 10;
-            case SALES -> bonusPercentage = 12;
-            case FINANCE -> bonusPercentage = 8;
-            default -> bonusPercentage = 1;
-        }
-        return bonusPercentage;
-    }
-
 
 }
