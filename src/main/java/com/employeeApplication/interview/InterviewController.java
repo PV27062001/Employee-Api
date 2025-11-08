@@ -10,6 +10,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/interview")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class InterviewController {
     private final InterviewService interviewService;
 

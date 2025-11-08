@@ -48,3 +48,4 @@ jobs:
             ADMIN_USERNAME=${{ secrets.ADMIN_USERNAME }}
             ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
             ADMIN_ROLE=${{ secrets.ADMIN_ROLE }}
+            SIGNATURE_KEY=${{secrets.SIGNATURE_KEY}}
