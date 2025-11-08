@@ -8,6 +8,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/department")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class DepartmentController {
 
     private final DepartmentService departmentService;
