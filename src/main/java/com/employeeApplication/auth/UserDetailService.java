@@ -120,7 +120,7 @@ public class UserDetailService {
 
         return Map.of(
                 "access_token", newAccessToken,
-                "refresh_token", newRefreshToken.getToken()
+                "refresh_token", newRefreshToken.getToken() 
         );
     }
 

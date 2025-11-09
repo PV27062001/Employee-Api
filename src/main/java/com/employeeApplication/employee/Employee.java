@@ -21,7 +21,6 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 @ToString(exclude = {"manager","colleagues"})
 public class Employee {
-
     @Id
     private String employeeId;
 
@@ -39,9 +38,6 @@ public class Employee {
     private Manager manager;
 
     @ManyToMany
-//    @JoinTable(name = "employee_colleagues",
-//    joinColumns = @JoinColumn(name = "employee_id"),
-//    inverseJoinColumns = @JoinColumn(name = "colleague_id"))
     private List<Employee> colleagues;
 
     private boolean active;

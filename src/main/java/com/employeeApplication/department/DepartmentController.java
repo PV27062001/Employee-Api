@@ -13,9 +13,9 @@ public class DepartmentController {
 
     private final DepartmentService departmentService;
 
-    @GetMapping("/getAll-department")
-    public List<Department> getAllDepartment(){
-        return departmentService.getAllDepartment();
+    @GetMapping("/all")
+    public List<DepartmentResponse> getAllDepartment(){
+        return departmentService.getAllDepartmentResponse();
     }
 
     @PostMapping("/save-department")

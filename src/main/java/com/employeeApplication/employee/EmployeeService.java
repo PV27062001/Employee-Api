@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -94,6 +95,31 @@ public class EmployeeService {
         double bonusPercentage;
         bonusPercentage = departmentService.getBonusPercentageByDepartment(department);
         return salary + (salary * bonusPercentage/100);
+    }
+
+    public List<EmployeeResponse> getAllEmployeeResponse(){
+        List<Employee> getAll = getAllEmployee();
+        List<EmployeeResponse> result = new ArrayList<>();
+        for(Employee  employee : getAll){
+            result.add(buildEmployeeResponse(employee));
+        }
+        return result;
+    }
+
+    public EmployeeResponse buildEmployeeResponse(Employee employee){
+
+        String managerName = employee.getManager().getName();
+        return EmployeeResponse.builder()
+                .employeeId(employee.getEmployeeId())
+                .name(employee.getName())
+                .bonus(employee.getBonus())
+                .active(employee.isActive())
+                .createdAt(employee.getCreatedAt())
+                .updatedAt(employee.getUpdatedAt())
+                .managerName(managerName.isBlank()?"":managerName)
+                .departmentName(employee.getDept().getDepartmentName().name())
+                .salary(employee.getSalary())
+                .build();
     }
 
 }
