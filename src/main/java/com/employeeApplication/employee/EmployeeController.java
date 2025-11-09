@@ -18,10 +18,9 @@ public class EmployeeController {
     @Autowired
     EmployeeService employeeService;
 
-
     @GetMapping("/getAll")
-    public List<Employee> getAll(){
-        return employeeService.getAllEmployee();
+    public List<EmployeeResponse> getAll(){
+        return employeeService.getAllEmployeeResponse();
     }
 
     @GetMapping(value = "/getEmployeeByPages",params = {"pageNo","pageSize","sortBy","isAscending"})

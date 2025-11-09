@@ -5,6 +5,8 @@ import com.employeeApplication.exception.EmployeeException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -62,5 +64,23 @@ public class DepartmentService {
         return bonusPercentage;
     }
 
+    public List<DepartmentResponse> getAllDepartmentResponse(){
+        List<Department> getAllDepartments = getAllDepartment();
+        List<DepartmentResponse> result = new ArrayList<>();
+        for (Department department:getAllDepartments){
+            result.add(getDepartmentResponseByDepartment(department));
+        }
+        return result;
+    }
+
+
+    public DepartmentResponse getDepartmentResponseByDepartment(Department department){
+        return DepartmentResponse.builder()
+                .id(department.getId())
+                .departmentName(department.getDepartmentName())
+                .baseSalary(department.getBaseSalary())
+                .description(department.getDescription())
+                .build();
+    }
 
 }

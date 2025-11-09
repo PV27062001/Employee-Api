@@ -56,7 +56,7 @@ public class InterviewService {
 
     public InterviewResponse getInterviewResponseByUserName(String userName){
 
-        Interview interview =  Optional.of(interviewRepository.findInterviewByName(userName))
+        Interview interview =  Optional.ofNullable(interviewRepository.findInterviewByName(userName))
                 .orElseThrow(() -> new NoSuchElementException("No interview found for the given userName"));
 
         Map<String,String> resultMap = new HashMap<>();
@@ -82,7 +82,6 @@ public class InterviewService {
                     .filter(status -> status.getDepartment()
                             .getDepartmentName()
                             .name().equalsIgnoreCase(departmentName))
-
                     .findFirst()
                     .ifPresent(interviewDepartmentStatus -> {
                         if (isSelected.equals(("ACCEPTED"))) {

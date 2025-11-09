@@ -15,14 +15,14 @@ import java.util.List;
 public class InterviewController {
     private final InterviewService interviewService;
 
-    @PostMapping("/apply-job")
+    @PostMapping("/apply")
     @SneakyThrows
     public ResponseEntity<Interview> applyForInterview(@RequestBody InterviewRequest interviewRequest){
         return ResponseEntity.ok(interviewService.addInterviewData(interviewRequest));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/update-result")
+    @PatchMapping("/apply-result")
     public String isGotJob(@RequestBody ResultUpdate resultUpdate){
         return interviewService.jobResponse(resultUpdate);
     }
@@ -33,7 +33,7 @@ public class InterviewController {
         return interviewService.getAll();
     }
 
-    @GetMapping(value = "/track/get/interview-by/userName",params = {"userName"})
+    @GetMapping(value = "/my-status",params = {"userName"})
     public InterviewResponse getInterviewResponseByUserName(@RequestParam String userName){
         return interviewService.getInterviewResponseByUserName(userName);
     }
