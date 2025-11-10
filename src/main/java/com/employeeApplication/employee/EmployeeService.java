@@ -116,7 +116,7 @@ public class EmployeeService {
                 .active(employee.isActive())
                 .createdAt(employee.getCreatedAt())
                 .updatedAt(employee.getUpdatedAt())
-                .managerName(managerName.isBlank()?"":managerName)
+                .managerName(managerName.isEmpty()?"":managerName)
                 .departmentName(employee.getDept().getDepartmentName().name())
                 .salary(employee.getSalary())
                 .build();
