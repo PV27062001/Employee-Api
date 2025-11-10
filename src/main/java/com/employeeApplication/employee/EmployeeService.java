@@ -11,9 +11,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -108,7 +110,7 @@ public class EmployeeService {
 
     public EmployeeResponse buildEmployeeResponse(Employee employee){
 
-        String managerName = employee.getManager().getName();
+        Optional<String> managerName = Optional.ofNullable(employee.getManager().getName());
         return EmployeeResponse.builder()
                 .employeeId(employee.getEmployeeId())
                 .name(employee.getName())
@@ -116,7 +118,7 @@ public class EmployeeService {
                 .active(employee.isActive())
                 .createdAt(employee.getCreatedAt())
                 .updatedAt(employee.getUpdatedAt())
-                .managerName(managerName.isEmpty()?"":managerName)
+                .managerName(managerName.isEmpty()?"":managerName.orElseThrow())
                 .departmentName(employee.getDept().getDepartmentName().name())
                 .salary(employee.getSalary())
                 .build();
