@@ -51,6 +51,12 @@ public class EmployeeController {
     }
 
 
+    @GetMapping(value = "/getemployee",params = "name")
+    public EmployeeResponse getEmployeeByName(@RequestParam String name){
+        return employeeService.getEmployeeByName(name);
+    }
+
+
     /// learning purpose to get the csrf Token
     @GetMapping("/csrf-token")
     public CsrfToken getCsrfToken(HttpServletRequest httpServletRequest){
