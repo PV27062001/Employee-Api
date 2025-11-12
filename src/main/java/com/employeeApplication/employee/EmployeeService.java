@@ -2,6 +2,7 @@ package com.employeeApplication.employee;
 
 import com.employeeApplication.department.Department;
 import com.employeeApplication.department.DepartmentService;
+import com.employeeApplication.exception.EmployeeException;
 import com.employeeApplication.interview.ResultUpdate;
 import com.employeeApplication.manager.Manager;
 import com.employeeApplication.manager.ManagerService;
@@ -41,6 +42,14 @@ public class EmployeeService {
         int id = getAllEmployee().size() + 1;
         return initial + id;
     }
+
+    public boolean isEmployeeAlreadyPresent(String name) {
+        return employeeRepository.checkIsEmployeePresent(name)
+                .filter(u -> !u.isBlank())
+                .isPresent();
+    }
+
+
 
     public Department getDepartmentByName(String name){
         return departmentService.getDepartmentByName(name);
@@ -110,7 +119,7 @@ public class EmployeeService {
 
     public EmployeeResponse buildEmployeeResponse(Employee employee){
 
-        Optional<String> managerName = Optional.ofNullable(employee.getManager().getName());
+        Optional<String> managerName = Optional.ofNullable(employee.getManager()).map(Manager::getName);
         return EmployeeResponse.builder()
                 .employeeId(employee.getEmployeeId())
                 .name(employee.getName())
@@ -118,10 +127,17 @@ public class EmployeeService {
                 .active(employee.isActive())
                 .createdAt(employee.getCreatedAt())
                 .updatedAt(employee.getUpdatedAt())
-                .managerName(managerName.isEmpty()?"":managerName.orElseThrow())
+                .managerName(managerName.orElse(""))
                 .departmentName(employee.getDept().getDepartmentName().name())
                 .salary(employee.getSalary())
                 .build();
     }
 
+    public EmployeeResponse getEmployeeByName(String name) {
+        return buildEmployeeResponse(getEmployeeByNAme(name).orElseThrow(() -> new EmployeeException("No Such Employee found")));
+    }
+
+    private Optional<Employee> getEmployeeByNAme(String name) {
+        return Optional.ofNullable(employeeRepository.getEmployeeByNAme(name));
+    }
 }

@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/interview")
@@ -29,8 +29,8 @@ public class InterviewController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/getall/interview")
-    public List<Interview> getAll(){
-        return interviewService.getAll();
+    public Map<String,InterviewResponse> getAll(){
+        return interviewService.getAllInterviewByResponse();
     }
 
     @GetMapping(value = "/my-status",params = {"userName"})

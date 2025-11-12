@@ -4,6 +4,7 @@ import com.employeeApplication.auth.UserDetailService;
 import com.employeeApplication.department.Department;
 import com.employeeApplication.department.DepartmentService;
 import com.employeeApplication.employee.EmployeeService;
+import com.employeeApplication.exception.EmployeeException;
 import com.employeeApplication.exception.UserNameAuthenticationException;
 import com.employeeApplication.interview.interviewdepartmentstatus.InterviewDepartmentStatus;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,11 @@ public class InterviewService {
 
     public Interview addInterviewData(InterviewRequest interviewRequest) throws UserNameAuthenticationException {
 
-        String userName = userDetailService.isUserNamePresent(interviewRequest.getUserName());
+        String name = interviewRequest.getUserName();
+        if(employeeService.isEmployeeAlreadyPresent(name)){
+            throw new EmployeeException("This user Already have a job");
+        }
+        String userName = userDetailService.isUserNamePresent(name);
         Interview interview = Interview.builder()
                 .userName(userName)
                 .isAppliedAny(true)
@@ -51,23 +56,43 @@ public class InterviewService {
     }
 
     public Optional<Interview> getInterviewByUserName(String userName){
-        return Optional.of(interviewRepository.findInterviewByName(userName));
+        return Optional.ofNullable(interviewRepository.findInterviewByName(userName));
     }
 
     public InterviewResponse getInterviewResponseByUserName(String userName){
 
-        Interview interview =  Optional.ofNullable(interviewRepository.findInterviewByName(userName))
+        Interview interview =  getInterviewByUserName(userName)
                 .orElseThrow(() -> new NoSuchElementException("No interview found for the given userName"));
 
         Map<String,String> resultMap = new HashMap<>();
         for(int i = 0;i< interview.getDepartmentStatuses().size();i++){
             resultMap.put(interview.getDepartmentStatuses().get(i).getDepartment().getDepartmentName().name(),interview.getDepartmentStatuses().get(i).getStatus().name());
         }
-       return InterviewResponse.builder()
-                .userName(userName)
+       return buildInterviewResponse(interview, resultMap);
+    }
+
+    private static InterviewResponse buildInterviewResponse(Interview interview, Map<String, String> resultMap) {
+        return InterviewResponse.builder()
+                .userName(interview.getUserName())
                 .appliedDate(interview.getCreatedAt())
                 .statusByDepartment(resultMap)
                 .build();
+    }
+
+    public Map<String,InterviewResponse> getAllInterviewByResponse(){
+        List<Interview> findAll = getAll();
+        Map<String,InterviewResponse> result = new HashMap<>();
+
+        Map<String,String> resultMap = new HashMap<>();
+
+        for(Interview interview: findAll){
+            for(int i = 0;i< interview.getDepartmentStatuses().size();i++){
+                resultMap.put(interview.getDepartmentStatuses().get(i).getDepartment().getDepartmentName().name(),interview.getDepartmentStatuses().get(i).getStatus().name());
+            }
+            result.put(interview.getUserName(),buildInterviewResponse(interview,resultMap));
+        }
+
+        return result;
     }
 
     @Transactional
